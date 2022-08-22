@@ -1,0 +1,2 @@
+# firstRust
+learn  rust 
