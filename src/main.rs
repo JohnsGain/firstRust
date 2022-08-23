@@ -1,15 +1,14 @@
+extern crate crossbeam;
 extern crate image;
 extern crate num;
 
 use std::fs::File;
+use std::io::Write;
 use std::str::FromStr;
 
 use image::ColorType;
 use image::png::PNGEncoder;
 use num::Complex;
-use std::io::Result;
-use std::io::Write;
-use num::traits::real::Real;
 
 /**
 复数：实数+虚数
@@ -30,19 +29,24 @@ use num::traits::real::Real;
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
-    if args.len()!=5 {
+    if args.len() != 5 {
         writeln!(std::io::stderr(), "Usage:曼德洛布特集合 绘制参数不够")
             .unwrap();
         writeln!(std::io::stderr(), "eg: {} mandel.png 1000x750 -1.20,0.35 -1,0.20", args[0]);
         std::process::exit(1);
     }
-    let bounds = parse_pair(&args[2], 'x');
+    let bounds: (usize, usize) = parse_pair(&args[2], 'x')
+        .expect("error parsing image dimensions");
     let upper_left = parse_complex(&args[3])
         .expect("error parsing upper_left ");
     let lower_right = parse_complex(&args[4])
         .expect("error parsing lower_right");
-    let mut pixels = vec![0; bounds.0 * bounds.ln_1p()];
-    render(&mut pixels,)
+    let mut pixels = vec![0; bounds.0 * bounds.1];
+    // vec![v,n]  宏调用，会创建一个长度为n，每个元素都是 v的 向量
+
+    renderAsync(&mut pixels, bounds, upper_left, lower_right);
+    write_image(&args[1], &pixels, bounds)
+        .expect("error writing png file");
 }
 
 ///
@@ -130,8 +134,12 @@ fn test_pixel_to_point() {
                Complex { re: -0.5, im: -0.5 });
 }
 
-fn render( pixel: &mut [u8], bounds: (usize, usize),
-          upper_left: Complex<f64>, lower_right: Complex<f64>) {
+///
+///
+/// 单线程版本
+///
+fn renderSync(pixel: &mut [u8], bounds: (usize, usize),
+              upper_left: Complex<f64>, lower_right: Complex<f64>) {
     assert_eq!(pixel.len(), bounds.0 * bounds.1);
     for row in 0..bounds.1 {
         for column in 0..bounds.0 {
@@ -143,6 +151,30 @@ fn render( pixel: &mut [u8], bounds: (usize, usize),
                     Some(count) => 255 - count as u8
                 };
         }
+    }
+}
+
+///
+/// |spawner| {...} 是 一个Rust闭包，闭包是一个可以被当做函数调用的值。|spawner| 是参数列表{...}是函数体
+/// 跟使用 fn声明的函数不同，不需要声明闭包的参数类型，Rust会推断闭包的参数以及返回值类型
+///
+fn renderAsync(pixel: &mut [u8], bounds: (usize, usize), upper_left: Complex<f64>, lower_right: Complex<f64>) {
+    let threads = 8;
+    let rows_per_band = bounds.1 / threads + 1;
+    {
+        let bands: Vec<&mut [u8]> = pixel.chunks_mut(rows_per_band * bounds.0).collect();
+        crossbeam::scope(|spawner| {
+            for (i, band) in bands.into_iter().enumerate() {
+                let top = rows_per_band * i;
+                let height = band.len() / bounds.0;
+                let band_bounds = (bounds.0, height);
+                let band_upper_left = pixel_to_point(bounds, (0, top), upper_left, lower_right);
+                let band_lower_right = pixel_to_point(bounds, (bounds.0, top + height), upper_left, lower_right);
+                spawner.spawn(move || {
+                    renderSync(band, band_bounds, band_upper_left, band_lower_right);
+                });
+            }
+        });
     }
 }
 
