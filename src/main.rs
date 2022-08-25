@@ -21,7 +21,7 @@ fn main() {
     println!("溢出之后的翻转值{:?}", x);
 
     // 类型转换
-    let v : f64=3.2;
+    let v: f64 = 3.2;
 
     println!("f64值{:?} 类型转换为 {:?}", v, v as f32);
     println!("-1.01f64.floor={}", -1.01f64.ceil());
@@ -64,13 +64,24 @@ fn print_slice(n: &[f64]) {
 #[test]
 fn test_print_slice() {
     let n0: Vec<i32> = (0..9).collect();
-    let n: Vec<f64> = vec![6.2, 3., 5.6, 7.9];
-    let sn: &[f64] = &n;
+    let v: Vec<f64> = vec![6.2, 3., 5.6, 7.9];
+    // 把整个向量的引用给了切片
+    let sn: &[f64] = &v;
     print_slice(sn);
 
-    let arr: [f64;5] = [2., 4., 8., 9., 10.];
+    // 只给部分范围的元素引用给切片
+    let sn2: &[f64] = &v[2..];
+    print_slice(sn2);
+
+
+    let arr: [f64; 6] = [2., 4.23, 8., 9., 10.,6.88];
+    // 把整个数组的引用给了切片
     let sarr: &[f64] = &arr;
     print_slice(sarr);
+
+    // 只给部分范围的元素引用给切片
+    let sarr2: &[f64] = &arr[1..6];
+    print_slice(sarr2);
 
     let mut v_capacity: Vec<u32> = Vec::with_capacity(5);
     v_capacity.push(2);
