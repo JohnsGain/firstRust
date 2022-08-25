@@ -129,10 +129,58 @@ fn test_string() {
 /// 字节字符串 ：就是前缀带b 的字符串字面量。字节字符串 是 u8（即字节） 值的切片，
 /// 不是unicode文本的切片. 字节字符串不能包含任意unicode字符，只能是 ascii 和\xHH 转移序列
 ///
+/// 字符串字面量的值存在堆内存，字符串本身有3个头信息(指向堆内存里面字面量第一个字符的引用地址，
+///     字符串容量，字符串实际字符字节长度)存储在栈内存。
+///
+///  &str  ，字符串切片，对其他utf8文本某部分字符序列的引用。也是胖指针，
+/// 有两个头信息(向堆内存里面字面量第一个字符的引用地址，引用部分实际字符的字节长度)存储在栈内存，
+///
+/// String &str 的len()方法返回的是字节长度，不是字符个数。 不要试图修改 &str指向引用的部分字符值，编译会报panic
+///  &str类似于 数组、向量切面 &[T]，  String类似于 Vec<T>
+///
 fn byte_str() {
     let method = b"GET";
     println!("methond={:?}", method);
-    assert_eq!(method,&[b'G',b'E',b'T'])
+    assert_eq!(method, &[b'G', b'E', b'T']);
+
+    let noodles = "noodles".to_string();
+    let oodles = &noodles[1..];
+    let poodles = "(￣.￣)";
+
+    println!("字节长度={:?}", noodles.len());
+    println!("字节长度={}", oodles.len());
+    println!("字符长度={}", poodles.chars().count());
+    println!("字节长度={}", poodles.len());
+
+    // 试图修复 字符串切片 下标0 的值，会编译Panic
+    let mut s = "hello";
+    // s[0] = 'A';
+    // s.push('x');
+
+    // 以下方式可以创建字符串
+    let hello = "hello".to_string(); // 实际上是复制字符串
+    // format!()宏 和 println!类型，区别是他返回一个新String,而不是直接把文本标准输出，并且不会自动在末尾加换行符
+    let longitude = format!("{}°{:02}'{:02}\"N", 24, 5, 23);
+    println!("{}", longitude);
+
+    // 字符串数组,
+    let bits = vec!["veni", "bidi", "john"];
+    println!("{}", bits.concat());
+    println!("{}", bits.join("-"));
+
+    // 字符串比较。支持 ==， !=,<, >,>=,<=  只要字符串包含相同字符，顺序。那么就相等，无论他们是否指向 同一个内存地址
+    assert!("ONE".to_lowercase() == "one");
+    println!("{}", "相对无言，欲语泪千行".contains("泪"));
+    println!("{}", "相对无言，(￣.￣)".replace("￣", "🌝"));
+    println!("{}", "相对无言，(￣.￣)\n");
+    println!("{}", "相对无言，(￣.￣)   ".trim());
+
+    let word_comma = "夜，来，幽，梦，忽，还，乡";
+    let split = word_comma.split("，");
+    for word in split {
+        println!("{}", word);
+    }
+
 }
 
 #[test]
