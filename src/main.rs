@@ -74,7 +74,7 @@ fn test_print_slice() {
     print_slice(sn2);
 
 
-    let arr: [f64; 6] = [2., 4.23, 8., 9., 10.,6.88];
+    let arr: [f64; 6] = [2., 4.23, 8., 9., 10., 6.88];
     // 把整个数组的引用给了切片
     let sarr: &[f64] = &arr;
     print_slice(sarr);
@@ -93,4 +93,49 @@ fn test_print_slice() {
 
     println!("可容纳数量={}", v_capacity.capacity());
     println!("实际数量={}", v_capacity.len());
+}
+
+///
+/// 字符串字面量，双引号需要转义,  字符串可以分散到多行..
+/// 多行字符串带左斜杠拼接，类似于java中的 + 号，实际字符串是连着一起的，只是为了可读性分在多行展示。
+///
+/// Rust提供了 原始字符串 语法，原始字符串里面的任何内容都按照原样保存，不做转义。
+///
+fn string() {
+    let mut speech = "everything can be possible";
+    println!("{}", speech);
+    speech = "i can say:\"everything can be possible!\" ";
+    println!("{}", speech);
+
+    speech = "in the room come and go,\
+    Singging of mount abora";
+    println!("{}", speech);
+
+    speech = "in the room come and go,
+    Singging of mount abora";
+    println!("raw_str={}", speech);
+
+    // 原始字符串, r###"[这里的内容是原始字符串文本]"###
+    let raw_str = r###"i can say:"everything can be possible!\\" Singing of mount ab###ora "###;
+    println!("{}", raw_str);
+}
+
+#[test]
+fn test_string() {
+    string();
+}
+
+///
+/// 字节字符串 ：就是前缀带b 的字符串字面量。字节字符串 是 u8（即字节） 值的切片，
+/// 不是unicode文本的切片. 字节字符串不能包含任意unicode字符，只能是 ascii 和\xHH 转移序列
+///
+fn byte_str() {
+    let method = b"GET";
+    println!("methond={:?}", method);
+    assert_eq!(method,&[b'G',b'E',b'T'])
+}
+
+#[test]
+fn test_byte_string() {
+    byte_str();
 }
