@@ -51,6 +51,10 @@ fn build_vector_easy() -> Vec<i16> {
     v
 }
 
+
+///
+///
+///
 fn print_slice(n: &[f64]) {
     for item in n {
         println!("{}", item);
@@ -58,3 +62,8 @@ fn print_slice(n: &[f64]) {
 }
 
 #[test]
+fn test_print_slice() {
+    let n: Vec<f64> = vec![6.2, 3., 5.6, 7.9];
+    let sn: &[f64] = &n;
+    print_slice(sn);
+}
