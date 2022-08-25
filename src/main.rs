@@ -1,4 +1,4 @@
-
+use std::str::FromStr;
 
 /**
 复数：实数+虚数
@@ -63,7 +63,23 @@ fn print_slice(n: &[f64]) {
 
 #[test]
 fn test_print_slice() {
+    let n0: Vec<i32> = (0..9).collect();
     let n: Vec<f64> = vec![6.2, 3., 5.6, 7.9];
     let sn: &[f64] = &n;
     print_slice(sn);
+
+    let arr: [f64;5] = [2., 4., 8., 9., 10.];
+    let sarr: &[f64] = &arr;
+    print_slice(sarr);
+
+    let mut v_capacity: Vec<u32> = Vec::with_capacity(5);
+    v_capacity.push(2);
+    v_capacity.push(5);
+    v_capacity.push(6);
+    v_capacity.push(8);
+    v_capacity.push(8);
+    v_capacity.push(8);
+
+    println!("可容纳数量={}", v_capacity.capacity());
+    println!("实际数量={}", v_capacity.len());
 }
