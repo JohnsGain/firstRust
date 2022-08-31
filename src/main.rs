@@ -83,3 +83,76 @@ fn transfer2() {
     }
 }
 
+///
+/// 向量中某些下标元素所有权的转移
+///
+fn transfer3() {
+    let mut v = Vec::new();
+    for i in 101..106 {
+        v.push(i.to_string());
+    }
+
+    // let third = v[2];
+    // let fifth = v[4];
+    // 上面代码执行完之后，向量下标 3，5的元素已经变成未初始化的了. 实际上上面的代码不能编译通过
+
+    // 如果只是想查看值，不想转移，可以用引用
+    let third = &v[2];// 可以编译通过
+
+    // 如果真想转移值，可以用以下方式
+
+    // 1. 取向量末尾元素
+    let c = v.pop().unwrap();
+    println!("c={}", c);
+
+    // 2.取某个下标的值，用最后一个元素替代原来下标的位置
+    let d = v.swap_remove(1);
+    println!("d={}", d);
+
+    // 3. 用指定的值 交换 被转移出来的下标位置
+    let e = std::mem::replace(&mut v[2], "料得年年肠断处".to_string());
+    println!("e={}", e);
+
+    for mut f in v {
+        println!("最后向量剩下元素={}", f);
+    }
+}
+
+#[test]
+fn test_tranf3() {
+    transfer3();
+}
+
+fn transfer4() {
+    struct Person{name:Option<String>, birth:i32};
+
+    let mut composers = Vec::new();
+    composers.push(Person { name: Some("煮豆持作羹".to_string()), birth: 22 });
+
+  //  let first_name=composers[0].name;// 这样会报错，因为结构体Name属性类型已经是option
+
+    let first_name = std::mem::replace(&mut composers[0].name, None);
+    println!("first_name={:?}", first_name);
+
+    println!("{:?}", composers[0].name);
+
+    // 上面的replace方法可以简写为
+
+    let mut composes2 = Vec::new();
+    composes2.push(Person { name: Some("漉豉以为汁".to_string()), birth: 23 });
+
+    let firstname2 = composes2[0].name.take();
+
+    println!("firstname2={:?}", firstname2);
+
+    println!("{:?}", composes2[0].name);
+
+}
+
+
+#[test]
+fn test_tranf4() {
+    transfer4();
+}
+
+
